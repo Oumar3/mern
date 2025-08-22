@@ -1,0 +1,59 @@
+                <div className="space-y-3 md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Localisation
+                  </label>
+                  
+                  {/* Location Type Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-600 mb-1">
+                      Type de localisation
+                    </label>
+                    <select
+                      value={formData.location?.type || 'INSEED'}
+                      onChange={(e) => handleLocationChange('type', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="INSEED">INSEED</option>
+                      <option value="Dehors de l'INSEED">Dehors de l'INSEED</option>
+                    </select>
+                  </div>
+
+                  {/* Meeting Room Selection (if INSEED) */}
+                  {formData.location?.type === 'INSEED' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                        Salle de réunion
+                      </label>
+                      <select
+                        value={typeof formData.location.meetingRoom === 'string' ? formData.location.meetingRoom : formData.location.meetingRoom?._id || ''}
+                        onChange={(e) => handleLocationChange('meetingRoom', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      >
+                        <option value="">Sélectionner une salle</option>
+                        {meetingRooms.map((room) => (
+                          <option key={room._id} value={room._id}>
+                            {room.name} (Capacité: {room.capacity})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Custom Location Input (if outside INSEED) */}
+                  {formData.location?.type === 'Dehors de l\'INSEED' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">
+                        Lieu personnalisé
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.location.customLocation || ''}
+                        onChange={(e) => handleLocationChange('customLocation', e.target.value)}
+                        placeholder="Entrez l'adresse ou le nom du lieu"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                  )}
+                </div>
