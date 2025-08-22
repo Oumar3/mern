@@ -45,7 +45,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Middleware
-app.use();
+app.use(cors({
+  origin: ['http://45.9.190.58', 'http://localhost:5173'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Serve uploaded files
