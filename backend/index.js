@@ -67,6 +67,7 @@ app.use('/api/suivi-indicateurs', suiviIndicateurRoutes);
 app.use('/api/excel-upload', excelUploadRoutes);
 app.use('/api/unites-de-mesure', uniteDeMesureRoutes);
 app.use('/api/orientations', orientationRoutes);
+app.use('/api/organisations', organisationRoutes);
 
 app.use('/api/meta-data', metaDataRoutes);
 app.use('/api/data-producers', dataProducerRoutes);
