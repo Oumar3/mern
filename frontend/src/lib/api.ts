@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // baseURL: '/api',
-  baseURL: 'http://127.0.0.1:5001/api',
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,7 +34,7 @@ api.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       if (refreshToken) {
         try {
-          const refreshResponse = await axios.post('http://127.0.0.1:5001/api/users/refresh-token', {
+          const refreshResponse = await axios.post(`${import.meta.env.VITE_API_URL}/users/refresh-token`, {
             refreshToken
           });
 
