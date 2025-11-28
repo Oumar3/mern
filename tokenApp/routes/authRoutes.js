@@ -1,8 +1,9 @@
-import express from 'express'
-import {LoginRateLimiter} from '../middleware/rateLimiter.js'
+import express from 'express';
+import { LoginRateLimiter } from '../middleware/rateLimiter.js';
+import authController from '../controllers/authController.js';
+import verifyJWT from '../middleware/verifyJWT.js';
 
-const authController = require('../controllers/authController')
-const router = express.Router()
+const router = express.Router();
 
 router.route('/')
     .post(LoginRateLimiter,authController.login)
