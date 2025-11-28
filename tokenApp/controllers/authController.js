@@ -2,7 +2,8 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import asyncHandler from 'express-async-handler';
-
+import { generateAccessToken, generateRefreshToken, verifyAccessToken, verifyRefreshToken } from '../controllers/tokenController.js';
+import { createRefreshToken, revokeRefreshToken, getRefreshToken } from '../services/refreshTokenService.js';
 const authController = {};
 
 /**
@@ -45,21 +46,13 @@ authController.login = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'Invalid username or password' });
 
     /** Generate Access Token (short life) */
-    const accessToken = jwt.sign(
-        {
-            username: user.username,
-            roles: user.roles
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
-    );
+    const accessToken = generateAccessToken({
+        username: user.username,
+        roles: user.roles
+    });
 
     /** Generate Refresh Token (long life) */
-    const refreshToken = jwt.sign(
-        { username: user.username },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
-    );
+    const refreshToken = generateRefreshToken();
 
     /** Send refresh token in httpOnly cookie */
     res.cookie("refreshToken", refreshToken, {
@@ -83,27 +76,19 @@ authController.refresh = asyncHandler(async (req, res) => {
         return res.status(401).json({ message: 'Refresh token required' });
 
     const refreshToken = cookies.refreshToken;
-
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, async (err, decoded) => {
-
-        if (err) return res.status(403).json({ message: 'Invalid refresh token' });
-
-        const user = await User.findOne({ username: decoded.username });
-
-        if (!user) return res.status(401).json({ message: 'User not found' });
-
+    try {
+        const user = await verifyRefreshToken(refreshToken);
         /** New access token */
-        const newAccessToken = jwt.sign(
-            {
-                username: user.username,
-                roles: user.roles
-            },
-            process.env.ACCESS_TOKEN_SECRET,
-            { expiresIn: '15m' }
-        );
-
+        const newAccessToken = generateAccessToken({
+            username: user.username,
+            roles: user.roles
+        });
         return res.status(200).json({ accessToken: newAccessToken });
-    });
+    } catch (error) {
+        return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+
 });
 
 
@@ -115,7 +100,7 @@ authController.logout = asyncHandler(async (req, res) => {
 
     if (!cookies?.refreshToken)
         return res.status(401).json({ message: 'Refresh token required' });
-    
+
     res.clearCookie("refreshToken", {
         httpOnly: true,
         secure: true,
